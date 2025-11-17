@@ -20,8 +20,8 @@ pip install -r requirements.txt
 python main.py
 ```
 
-Приложение доступно: **http://localhost:8000**  
-Документация API: **http://localhost:8000/docs**
+Приложение доступно: **http://localhost:8003**  
+Документация API: **http://localhost:8003/docs**
 
 ### Вариант 2: Docker Compose (рекомендуется)
 
@@ -40,12 +40,12 @@ docker compose down
 
 ### Health Check
 ```bash
-curl http://localhost:8000/health
+curl http://localhost:8003/health
 ```
 
 ### Создание пользователя
 ```bash
-curl -X POST http://localhost:8000/api/v1/users \
+curl -X POST http://localhost:8003/api/v1/users \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
@@ -57,12 +57,12 @@ curl -X POST http://localhost:8000/api/v1/users \
 
 ### Получение списка пользователей
 ```bash
-curl http://localhost:8000/api/v1/users
+curl http://localhost:8003/api/v1/users
 ```
 
 ### Поиск пользователя по username
 ```bash
-curl http://localhost:8000/api/v1/users/search/by-username/johndoe
+curl http://localhost:8003/api/v1/users/search/by-username/johndoe
 ```
 
 ## Запуск тестов
@@ -103,8 +103,8 @@ ps aux | grep "python main.py"
 # Остановить по PID
 kill <PID>
 
-# Или остановить все Python процессы на порту 8000
-lsof -ti:8000 | xargs kill -9
+# Или остановить все Python процессы на порту 8003
+lsof -ti:8003 | xargs kill -9
 ```
 
 ## CI/CD

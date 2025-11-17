@@ -80,7 +80,7 @@ jobs:
     if: needs.check-source.outputs.should_deploy == 'true'
     environment:
       name: production
-      url: http://${{ secrets.EC2_HOST }}:8000
+      url: http://${{ secrets.EC2_HOST }}:8003
     
     steps:
       - name: Checkout код
@@ -162,7 +162,7 @@ jobs:
           sleep 3
           
           HEALTH_CHECK=$(curl -s -o /dev/null -w "%{http_code}" \
-            http://${{ secrets.EC2_HOST }}:8000/health || echo "000")
+            http://${{ secrets.EC2_HOST }}:8003/health || echo "000")
           
           if [ "$HEALTH_CHECK" = "200" ]; then
             echo "✅ Health check успешен - приложение работает"
@@ -172,7 +172,7 @@ jobs:
           fi
           
           echo "🔍 Проверка deployment endpoint..."
-          DEPLOY_INFO=$(curl -s http://${{ secrets.EC2_HOST }}:8000/deployment || echo "{}")
+          DEPLOY_INFO=$(curl -s http://${{ secrets.EC2_HOST }}:8003/deployment || echo "{}")
           echo "Deployment info: $DEPLOY_INFO"
       
       - name: Очистка SSH ключа
@@ -197,7 +197,7 @@ jobs:
             echo "✅ Автор: ${{ github.actor }}"
             echo ""
             echo "Проверить деплой:"
-            echo "curl http://${{ secrets.EC2_HOST }}:8000/deployment"
+            echo "curl http://${{ secrets.EC2_HOST }}:8003/deployment"
           else
             echo "❌ Деплой провален!"
             echo "Проверьте логи выше для деталей"

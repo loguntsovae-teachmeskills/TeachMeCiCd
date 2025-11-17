@@ -68,12 +68,12 @@ pytest -v
 
 # 4. Локальный запуск
 python main.py
-# Проверить http://localhost:8000/health
+# Проверить http://localhost:8003/health
 
 # 5. Docker проверка
 docker compose up -d
 docker compose logs
-curl http://localhost:8000/health
+curl http://localhost:8003/health
 docker compose down
 ```
 

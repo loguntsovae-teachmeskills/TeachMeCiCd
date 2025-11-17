@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
     container_name: teachme-cicd-api
     ports:
-      - "8000:8000"  # Проброс порта на хост
+      - "8003:8003"  # Проброс порта на хост
     environment:
       - APP_ENV=development
       - DEBUG=true
@@ -18,7 +18,7 @@ services:
       - ./main.py:/app/main.py
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
       interval: 30s
       timeout: 10s
       retries: 3

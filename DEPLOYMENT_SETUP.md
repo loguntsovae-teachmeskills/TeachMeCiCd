@@ -20,10 +20,10 @@ sudo apt install -y python3 python3-pip python3-venv git curl
 sudo mkdir -p /home/ubuntu/app
 sudo chown ubuntu:ubuntu /home/ubuntu/app
 
-# 5. Откройте порт 8000 в Security Group
+# 5. Откройте порт 8003 в Security Group
 # Это делается в AWS Console:
 # EC2 → Security Groups → Ваша группа → Inbound rules → Add rule
-# Type: Custom TCP, Port: 8000, Source: 0.0.0.0/0 (или ваш IP)
+# Type: Custom TCP, Port: 8003, Source: 0.0.0.0/0 (или ваш IP)
 ```
 
 ### 2️⃣ Настройка GitHub Secrets
@@ -69,7 +69,7 @@ ubuntu
 | Type | Protocol | Port Range | Source | Description |
 |------|----------|------------|--------|-------------|
 | SSH | TCP | 22 | Your IP | SSH access |
-| Custom TCP | TCP | 8000 | 0.0.0.0/0 | FastAPI application |
+| Custom TCP | TCP | 8003 | 0.0.0.0/0 | FastAPI application |
 
 ### 4️⃣ Создание develop ветки (уже создана)
 
@@ -140,7 +140,7 @@ git push origin main
 
 ```bash
 # 1. Health check
-curl http://YOUR_EC2_IP:8000/health
+curl http://YOUR_EC2_IP:8003/health
 
 # Ответ:
 {
@@ -151,7 +151,7 @@ curl http://YOUR_EC2_IP:8000/health
 }
 
 # 2. Deployment status (НОВЫЙ ENDPOINT!)
-curl http://YOUR_EC2_IP:8000/deployment
+curl http://YOUR_EC2_IP:8003/deployment
 
 # Ответ:
 {
@@ -169,7 +169,7 @@ curl http://YOUR_EC2_IP:8000/deployment
 }
 
 # 3. Swagger документация
-curl http://YOUR_EC2_IP:8000/docs
+curl http://YOUR_EC2_IP:8003/docs
 # Или откройте в браузере
 ```
 
@@ -188,11 +188,11 @@ ssh -i your-key.pem ubuntu@YOUR_EC2_IP
 # скопирован именно этот ключ
 ```
 
-### Проблема: Порт 8000 недоступен
+### Проблема: Порт 8003 недоступен
 
 ```bash
 # На EC2 сервере проверьте:
-sudo netstat -tulpn | grep 8000
+sudo netstat -tulpn | grep 8003
 
 # Если процесс есть - порт занят
 # Если нет - приложение не запустилось
@@ -229,7 +229,7 @@ tail -f /home/ubuntu/app/app.log
 ps aux | grep python
 
 # Проверка порта
-sudo netstat -tulpn | grep 8000
+sudo netstat -tulpn | grep 8003
 ```
 
 ### GitHub Actions логи:
@@ -268,7 +268,7 @@ sudo netstat -tulpn | grep 8000
 - [ ] EC2 инстанс запущен и доступен
 - [ ] Python 3.11+ установлен на сервере
 - [ ] Директория `/home/ubuntu/app` создана
-- [ ] Security Group настроен (порты 22, 8000)
+- [ ] Security Group настроен (порты 22, 8003)
 - [ ] GitHub Secrets добавлены:
   - [ ] `EC2_SSH_KEY`
   - [ ] `EC2_HOST`
@@ -297,7 +297,7 @@ git push origin main
 # GitHub → Actions → Deploy to AWS EC2
 
 # 5. Проверьте деплой
-curl http://YOUR_EC2_IP:8000/deployment
+curl http://YOUR_EC2_IP:8003/deployment
 ```
 
 ## 📞 Поддержка

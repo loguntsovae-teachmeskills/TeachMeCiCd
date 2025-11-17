@@ -226,13 +226,13 @@ pytest --cov=. --cov-report=html
 
 ```bash
 # Полный health check
-curl http://localhost:8000/health
+curl http://localhost:8003/health
 
 # Kubernetes liveness
-curl http://localhost:8000/healthz
+curl http://localhost:8003/healthz
 
 # Kubernetes readiness
-curl http://localhost:8000/readyz
+curl http://localhost:8003/readyz
 ```
 
 ### Метрики
@@ -253,8 +253,8 @@ curl http://localhost:8000/readyz
 
 - [README.md](README.md) - Полная документация
 - [QUICKSTART.md](QUICKSTART.md) - Быстрый старт
-- [API Docs](http://localhost:8000/docs) - Swagger UI
-- [ReDoc](http://localhost:8000/redoc) - ReDoc
+- [API Docs](http://localhost:8003/docs) - Swagger UI
+- [ReDoc](http://localhost:8003/redoc) - ReDoc
 
 ## 🎓 Учебные материалы
 
