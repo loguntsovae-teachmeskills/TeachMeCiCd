@@ -3,12 +3,12 @@
 Точка входа в приложение с настройкой роутов и middleware.
 """
 
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-import uvicorn
 
-from app.routes import users, health
+from app.routes import health, users
 
 # Создание экземпляра приложения
 app = FastAPI(
