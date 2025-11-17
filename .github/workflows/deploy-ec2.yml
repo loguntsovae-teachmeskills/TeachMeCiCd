@@ -168,14 +168,12 @@ jobs:
           echo "🔍 Проверка health endpoint..."
           sleep 3
           
-          HEALTH_CHECK=$(curl -s -o /dev/null -w "%{http_code}" \
-            http://localhost:8003/health || echo "000")
+          HEALTH_CHECK=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8003/health || echo "000")
           
           if [ "$HEALTH_CHECK" = "200" ]; then
             echo "✅ Health check успешен - приложение работает"
           else
             echo "❌ Health check провален (HTTP $HEALTH_CHECK)"
-#            exit 1  # TODO fix me
           fi
           
           echo "🔍 Проверка deployment endpoint..."
