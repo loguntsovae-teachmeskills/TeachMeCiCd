@@ -85,11 +85,13 @@ jobs:
       - name: Checkout код
         uses: actions/checkout@v4
       
-      - name: Настройка SSH ключа
+      - name: Настройка SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+      
+      - name: Добавление хоста в known_hosts
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key.pem
-          chmod 600 ~/.ssh/deploy_key.pem
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
       
       - name: Создание архива приложения
@@ -106,13 +108,13 @@ jobs:
       
       - name: Копирование файлов на сервер
         run: |
-          scp -i ~/.ssh/deploy_key.pem -o StrictHostKeyChecking=no \
+          scp -o StrictHostKeyChecking=no \
             app.tar.gz \
             ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${{ env.DEPLOY_PATH }}/
       
       - name: Деплой приложения
         run: |
-          ssh -i ~/.ssh/deploy_key.pem -o StrictHostKeyChecking=no \
+          ssh -o StrictHostKeyChecking=no \
             ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'ENDSSH'
           
           set -e  # Остановка при ошибке
@@ -173,11 +175,6 @@ jobs:
           echo "🔍 Проверка deployment endpoint..."
           DEPLOY_INFO=$(curl -s http://${{ secrets.EC2_HOST }}:8003/deployment || echo "{}")
           echo "Deployment info: $DEPLOY_INFO"
-      
-      - name: Очистка SSH ключа
-        if: always()
-        run: |
-          rm -f ~/.ssh/deploy_key.pem
 
   # Уведомление о результате
   notify:
