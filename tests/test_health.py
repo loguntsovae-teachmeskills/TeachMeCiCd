@@ -19,7 +19,7 @@ def test_health_check():
     data = response.json()
     
     assert data["status"] == "healthy"
-    assert data["version"] == "1.0.0"
+    assert data["version"] == "1.0.1"
     assert data["database"] == "ok"
     assert "timestamp" in data
 
@@ -56,7 +56,7 @@ def test_root_endpoint():
     data = response.json()
     
     assert "message" in data
-    assert data["version"] == "1.0.0"
+    assert data["version"] == "1.0.1"
     assert data["docs"] == "/docs"
 
 

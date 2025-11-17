@@ -17,8 +17,8 @@ sudo apt update && sudo apt upgrade -y
 sudo apt install -y python3 python3-pip python3-venv git curl
 
 # 4. Создайте директорию для приложения
-sudo mkdir -p /home/ubuntu/app
-sudo chown ubuntu:ubuntu /home/ubuntu/app
+sudo mkdir -p /home/ubuntu/app/teachme-cicd-api
+sudo chown ubuntu:ubuntu /home/ubuntu/app/teachme-cicd-api
 
 # 5. Откройте порт 8003 в Security Group
 # Это делается в AWS Console:
