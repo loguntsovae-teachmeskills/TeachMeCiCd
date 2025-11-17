@@ -68,7 +68,7 @@ docker compose logs -f api
 docker compose down
 ```
 
-Приложение будет доступно по адресу: **http://localhost:8000**
+Приложение будет доступно по адресу: **http://localhost:8003**
 
 ### 3. Запуск локально (для разработки)
 
@@ -87,15 +87,15 @@ cp .env.example .env
 python main.py
 
 # Или через uvicorn
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:app --reload --host 0.0.0.0 --port 8003
 ```
 
 ## 📚 Документация API
 
 После запуска приложения доступна интерактивная документация:
 
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
+- **Swagger UI**: http://localhost:8003/docs
+- **ReDoc**: http://localhost:8003/redoc
 
 ### Основные endpoints
 
@@ -117,7 +117,7 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 #### Создание пользователя
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/users" \
+curl -X POST "http://localhost:8003/api/v1/users" \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
@@ -130,13 +130,13 @@ curl -X POST "http://localhost:8000/api/v1/users" \
 #### Получение списка пользователей
 
 ```bash
-curl http://localhost:8000/api/v1/users
+curl http://localhost:8003/api/v1/users
 ```
 
 #### Проверка health
 
 ```bash
-curl http://localhost:8000/health
+curl http://localhost:8003/health
 ```
 
 ## 🧪 Тестирование
@@ -240,7 +240,7 @@ docker compose run --rm api pytest -v
 docker build -t teachme-cicd-api .
 
 # Запуск
-docker run -d -p 8000:8000 --name api teachme-cicd-api
+docker run -d -p 8003:8003 --name api teachme-cicd-api
 
 # Просмотр логов
 docker logs -f api
@@ -320,13 +320,13 @@ flake8 .
 
 ```bash
 # Подробный health check
-curl http://localhost:8000/health
+curl http://localhost:8003/health
 
 # Простой health check для Kubernetes
-curl http://localhost:8000/healthz
+curl http://localhost:8003/healthz
 
 # Readiness check
-curl http://localhost:8000/readyz
+curl http://localhost:8003/readyz
 ```
 
 ### Логи

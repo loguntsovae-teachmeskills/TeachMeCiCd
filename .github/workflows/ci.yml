@@ -106,19 +106,20 @@ jobs:
         with:
           context: .
           push: false
+          load: true
           tags: teachme-cicd-api:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
       
       - name: Запуск контейнера для тестирования
         run: |
-          docker run -d -p 8000:8000 --name test-api teachme-cicd-api:test
+          docker run -d -p 8003:8003 --name test-api teachme-cicd-api:test
           sleep 10
       
       - name: Проверка работоспособности API
         run: |
-          curl -f http://localhost:8000/health || exit 1
-          curl -f http://localhost:8000/ || exit 1
+          curl -f http://localhost:8003/health || exit 1
+          curl -f http://localhost:8003/ || exit 1
       
       - name: Остановка контейнера
         if: always()

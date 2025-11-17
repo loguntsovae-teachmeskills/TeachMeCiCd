@@ -98,7 +98,7 @@ tests/test_users.py::TestUserValidation::test_create_user_missing_required_field
 ```bash
 ✅ Виртуальное окружение создано
 ✅ Зависимости установлены
-✅ Приложение запущено на http://localhost:8000
+✅ Приложение запущено на http://localhost:8003
 ```
 
 ### Проверка endpoints
@@ -265,7 +265,7 @@ tests/test_users.py::TestUserValidation::test_create_user_missing_required_field
 ### Docker
 ```bash
 ✅ docker build -t teachme-cicd .
-✅ docker run -p 8000:8000 teachme-cicd
+✅ docker run -p 8003:8003 teachme-cicd
 ```
 
 ### Docker Compose

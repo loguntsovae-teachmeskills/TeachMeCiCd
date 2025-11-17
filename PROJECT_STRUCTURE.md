@@ -135,7 +135,7 @@ docker compose up -d
 pytest -v
 
 # Открыть документацию
-open http://localhost:8000/docs
+open http://localhost:8003/docs
 ```
 
 ---
