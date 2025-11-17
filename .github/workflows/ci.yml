@@ -32,12 +32,10 @@ jobs:
       - name: Проверка форматирования с Black
         run: |
           black --check --diff .
-        continue-on-error: true
       
       - name: Проверка импортов с isort
         run: |
           isort --check-only --diff .
-#        continue-on-error: true
       
       - name: Линтинг с flake8
         run: |
