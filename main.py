@@ -38,7 +38,7 @@ async def root():
     """Корневой endpoint."""
     return {
         "message": "Добро пожаловать в TeachMe CI/CD API!",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "docs": "/docs"
     }
 
