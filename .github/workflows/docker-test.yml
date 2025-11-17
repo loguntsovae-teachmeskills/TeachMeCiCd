@@ -4,11 +4,6 @@
 name: Docker Compose Test
 
 on:
-  push:
-    paths:
-      - 'docker-compose.yml'
-      - 'Dockerfile'
-      - '.dockerignore'
   pull_request:
     paths:
       - 'docker-compose.yml'
