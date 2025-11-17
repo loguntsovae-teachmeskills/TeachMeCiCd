@@ -14,7 +14,7 @@ from app.routes import users, health
 app = FastAPI(
     title="TeachMe CI/CD API",
     description="Демонстрационное FastAPI приложение для изучения CI/CD процессов",
-    version="1.0.0",
+    version="1.0.1",
     docs_url="/docs",
     redoc_url="/redoc"
 )
