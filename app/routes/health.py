@@ -45,7 +45,7 @@ async def health_check():
     return HealthResponse(
         status="healthy",
         timestamp=datetime.now(),
-        version="1.0.1",
+        version="1.0.2",
         database="ok"
     )
 
