@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # Основное приложение FastAPI
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: teachme-cicd-api
+    ports:
+      - "8000:8000"  # Проброс порта на хост
+    environment:
+      - APP_ENV=development
+      - DEBUG=true
+    volumes:
+      # Монтируем код для hot-reload в development
+      - ./app:/app/app
+      - ./main.py:/app/main.py
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - app-network
+
+  # Опциональный сервис - Redis для кеширования
+  # Раскомментируйте при необходимости
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: teachme-cicd-redis
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis-data:/data
+  #   restart: unless-stopped
+  #   networks:
+  #     - app-network
+
+  # Опциональный сервис - PostgreSQL база данных
+  # Раскомментируйте при необходимости
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: teachme-cicd-postgres
+  #   environment:
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=postgres
+  #     - POSTGRES_DB=teachme_db
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U postgres"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   networks:
+  #     - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+# volumes:
+#   redis-data:
+#   postgres-data:

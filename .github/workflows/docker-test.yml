@@ -1,0 +1,71 @@
+# Workflow для тестирования Docker Compose
+# Проверка работоспособности приложения в контейнерах
+
+name: Docker Compose Test
+
+on:
+  push:
+    paths:
+      - 'docker-compose.yml'
+      - 'Dockerfile'
+      - '.dockerignore'
+  pull_request:
+    paths:
+      - 'docker-compose.yml'
+      - 'Dockerfile'
+      - '.dockerignore'
+  workflow_dispatch:
+
+jobs:
+  docker-compose-test:
+    name: Тест Docker Compose
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout код
+        uses: actions/checkout@v4
+      
+      - name: Запуск приложения через Docker Compose
+        run: |
+          docker compose up -d
+          echo "Ожидание запуска приложения..."
+          sleep 15
+      
+      - name: Проверка запущенных контейнеров
+        run: |
+          docker compose ps
+          docker compose logs api
+      
+      - name: Проверка health endpoint
+        run: |
+          curl -f http://localhost:8000/health || exit 1
+          echo "✅ Health check успешен"
+      
+      - name: Проверка API endpoints
+        run: |
+          # Проверка корневого endpoint
+          curl -f http://localhost:8000/ || exit 1
+          
+          # Проверка документации
+          curl -f http://localhost:8000/docs || exit 1
+          
+          # Создание пользователя
+          curl -X POST http://localhost:8000/api/v1/users \
+            -H "Content-Type: application/json" \
+            -d '{"email":"test@example.com","username":"testuser","password":"password123"}' \
+            || exit 1
+          
+          # Получение списка пользователей
+          curl -f http://localhost:8000/api/v1/users || exit 1
+          
+          echo "✅ Все API endpoints работают"
+      
+      - name: Просмотр логов при ошибке
+        if: failure()
+        run: |
+          docker compose logs
+      
+      - name: Остановка контейнеров
+        if: always()
+        run: |
+          docker compose down -v

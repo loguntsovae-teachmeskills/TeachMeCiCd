@@ -1,0 +1,205 @@
+# Workflow для автоматического деплоя на AWS EC2
+# Деплой происходит только при мердже из develop в main
+
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - main  # Деплой только при push в main (обычно после merge из develop)
+  workflow_dispatch:  # Возможность запустить вручную
+
+env:
+  APP_NAME: teachme-cicd-api
+  DEPLOY_PATH: /home/ubuntu/app
+  
+jobs:
+  # Проверка что это merge из develop в main
+  check-source:
+    name: Проверка источника изменений
+    runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.check.outputs.should_deploy }}
+    
+    steps:
+      - name: Checkout код
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      
+      - name: Проверка источника merge
+        id: check
+        run: |
+          # Получаем сообщение последнего коммита
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          echo "Commit message: $COMMIT_MSG"
+          
+          # Проверяем, является ли это merge коммитом из develop
+          if [[ "$COMMIT_MSG" == *"Merge"*"develop"* ]] || [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "✅ Деплой разрешен - это merge из develop или ручной запуск"
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ Деплой пропущен - это не merge из develop"
+            echo "should_deploy=false" >> $GITHUB_OUTPUT
+          fi
+
+  # Запуск тестов перед деплоем
+  test:
+    name: Тестирование перед деплоем
+    runs-on: ubuntu-latest
+    needs: check-source
+    if: needs.check-source.outputs.should_deploy == 'true'
+    
+    steps:
+      - name: Checkout код
+        uses: actions/checkout@v4
+      
+      - name: Установка Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Установка зависимостей
+        run: |
+          pip install -r requirements.txt
+      
+      - name: Запуск тестов
+        run: |
+          pytest -v --tb=short
+      
+      - name: Проверка импортов
+        run: |
+          python -c "from main import app; print('✅ Импорт успешен')"
+
+  # Деплой на AWS EC2
+  deploy:
+    name: Деплой на AWS EC2
+    runs-on: ubuntu-latest
+    needs: [check-source, test]
+    if: needs.check-source.outputs.should_deploy == 'true'
+    environment:
+      name: production
+      url: http://${{ secrets.EC2_HOST }}:8000
+    
+    steps:
+      - name: Checkout код
+        uses: actions/checkout@v4
+      
+      - name: Настройка SSH ключа
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key.pem
+          chmod 600 ~/.ssh/deploy_key.pem
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+      
+      - name: Создание архива приложения
+        run: |
+          tar -czf app.tar.gz \
+            --exclude='venv' \
+            --exclude='__pycache__' \
+            --exclude='.pytest_cache' \
+            --exclude='.git' \
+            --exclude='*.pyc' \
+            --exclude='htmlcov' \
+            --exclude='.coverage' \
+            app/ main.py requirements.txt Dockerfile docker-compose.yml
+      
+      - name: Копирование файлов на сервер
+        run: |
+          scp -i ~/.ssh/deploy_key.pem -o StrictHostKeyChecking=no \
+            app.tar.gz \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${{ env.DEPLOY_PATH }}/
+      
+      - name: Деплой приложения
+        run: |
+          ssh -i ~/.ssh/deploy_key.pem -o StrictHostKeyChecking=no \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'ENDSSH'
+          
+          set -e  # Остановка при ошибке
+          
+          echo "📦 Распаковка приложения..."
+          cd ${{ env.DEPLOY_PATH }}
+          tar -xzf app.tar.gz
+          rm app.tar.gz
+          
+          echo "🐍 Установка/обновление зависимостей..."
+          if [ ! -d "venv" ]; then
+            python3 -m venv venv
+          fi
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          
+          echo "📝 Сохранение информации о деплое..."
+          cat > /tmp/deployment_info.json << EOF
+          {
+            "deployed_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "commit_sha": "${{ github.sha }}",
+            "branch": "${{ github.ref_name }}",
+            "deployed_by": "${{ github.actor }}",
+            "workflow_run": "${{ github.run_number }}"
+          }
+          EOF
+          
+          echo "🔄 Перезапуск приложения..."
+          # Останавливаем старый процесс
+          pkill -f "python.*main.py" || true
+          sleep 2
+          
+          # Запускаем новый процесс
+          nohup venv/bin/python main.py > app.log 2>&1 &
+          
+          echo "⏳ Ожидание запуска приложения..."
+          sleep 5
+          
+          echo "✅ Деплой завершен!"
+          ENDSSH
+      
+      - name: Проверка работоспособности после деплоя
+        run: |
+          echo "🔍 Проверка health endpoint..."
+          sleep 3
+          
+          HEALTH_CHECK=$(curl -s -o /dev/null -w "%{http_code}" \
+            http://${{ secrets.EC2_HOST }}:8000/health || echo "000")
+          
+          if [ "$HEALTH_CHECK" = "200" ]; then
+            echo "✅ Health check успешен - приложение работает"
+          else
+            echo "❌ Health check провален (HTTP $HEALTH_CHECK)"
+            exit 1
+          fi
+          
+          echo "🔍 Проверка deployment endpoint..."
+          DEPLOY_INFO=$(curl -s http://${{ secrets.EC2_HOST }}:8000/deployment || echo "{}")
+          echo "Deployment info: $DEPLOY_INFO"
+      
+      - name: Очистка SSH ключа
+        if: always()
+        run: |
+          rm -f ~/.ssh/deploy_key.pem
+
+  # Уведомление о результате
+  notify:
+    name: Уведомление о деплое
+    runs-on: ubuntu-latest
+    needs: [check-source, test, deploy]
+    if: always() && needs.check-source.outputs.should_deploy == 'true'
+    
+    steps:
+      - name: Результат деплоя
+        run: |
+          if [ "${{ needs.deploy.result }}" = "success" ]; then
+            echo "🎉 Деплой на AWS EC2 выполнен успешно!"
+            echo "✅ Коммит: ${{ github.sha }}"
+            echo "✅ Ветка: ${{ github.ref_name }}"
+            echo "✅ Автор: ${{ github.actor }}"
+            echo ""
+            echo "Проверить деплой:"
+            echo "curl http://${{ secrets.EC2_HOST }}:8000/deployment"
+          else
+            echo "❌ Деплой провален!"
+            echo "Проверьте логи выше для деталей"
+            exit 1
+          fi
