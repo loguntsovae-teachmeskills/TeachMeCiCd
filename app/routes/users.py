@@ -3,16 +3,12 @@
 CRUD операции для демонстрации функционала API.
 """
 
-from fastapi import APIRouter, HTTPException, status
-from typing import List
 from datetime import datetime
+from typing import List
 
-from app.models import (
-    UserCreate,
-    UserUpdate,
-    UserResponse,
-    MessageResponse
-)
+from fastapi import APIRouter, HTTPException, status
+
+from app.models import MessageResponse, UserCreate, UserResponse, UserUpdate
 
 router = APIRouter()
 

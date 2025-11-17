@@ -3,13 +3,18 @@
 Используется для мониторинга состояния приложения.
 """
 
-from fastapi import APIRouter
-from datetime import datetime
-from app.models import HealthResponse
-import os
+
+
 import json
+import os
+from datetime import datetime
+
+from fastapi import APIRouter
+
+from app.models import HealthResponse
 
 router = APIRouter()
+
 
 # Путь к файлу с информацией о деплое
 DEPLOYMENT_INFO_FILE = "/tmp/deployment_info.json"
