@@ -80,7 +80,6 @@ jobs:
     if: needs.check-source.outputs.should_deploy == 'true'
     environment:
       name: production
-      url: http://${{ secrets.EC2_HOST }}:8003
     
     steps:
       - name: Checkout код
